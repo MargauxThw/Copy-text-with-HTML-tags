@@ -1,0 +1,8 @@
+{
+  "name": "Copy-text-with-HTML-tags",
+  "version": "1.0.0",
+  "description": "A plugin to copy text with <u> <b> and <i> tags where applicable",
+  "main": "code.js",
+  "author": "",
+  "license": ""
+}

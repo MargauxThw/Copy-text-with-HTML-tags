@@ -1,0 +1,189 @@
+<textarea id="text"></textarea>
+<div id="options">
+  <div class="checkbox">
+    <input id="br-check" name="br-check" type="checkbox" value="br-check">
+    <label for="br-check">Replace new lines with &lt;br></label>
+  </div>
+  <div class="checkbox">
+    <input id="underline-check" name="underline-check" type="checkbox" value="underline-check">
+    <label for="underline-check">Include underline tags (&lt;u>&lt;/u>)</label>
+  </div>
+  <div class="checkbox">
+    <input id="italics-check" name="italics-check" type="checkbox" value="italics-check">
+    <label for="italics-check">Include italics tags (&lt;i>&lt;/i>)</label>
+  </div>
+  <div class="checkbox">
+    <input id="bold-check" name="bold-check" type="checkbox" value="bold-check">
+    <label for="bold-check">Include bold tags (&lt;b>&lt;/b>)</label>
+  </div>
+</div>
+<button id="toggle-options">Show options</button>
+
+
+<script>
+  var underline = true
+  var bold = true
+  var italics = true
+  var br = true
+
+  onmessage = (event) => {
+    if (event.data.pluginMessage.msg === "init") {
+      var text = event.data.pluginMessage.text
+      document.getElementById("text").value = text
+    } else if (event.data.pluginMessage.msg === "init-options") {
+      // Boolean values
+      underline = event.data.pluginMessage.underline
+      bold = event.data.pluginMessage.bold
+      italics = event.data.pluginMessage.italics
+      br = event.data.pluginMessage.br
+    }
+  }
+
+  document.getElementById("toggle-options").addEventListener("click", function () {
+    if (document.getElementById("toggle-options").innerText === "Show options") {
+      document.getElementById("underline-check").checked = underline
+      document.getElementById("bold-check").checked = bold
+      document.getElementById("italics-check").checked = italics
+      document.getElementById("br-check").checked = br
+
+      document.getElementById("toggle-options").innerText = "Hide options & save"
+      document.getElementById("text").style.display = "none"
+      document.getElementById("options").style.display = "block"
+
+
+    } else {
+      parent.postMessage({
+        pluginMessage: {
+          type: "update-options",
+          underline: document.getElementById("underline-check").checked ? "checked" : "unchecked",
+          bold: document.getElementById("bold-check").checked ? "checked" : "unchecked",
+          italics: document.getElementById("italics-check").checked ? "checked" : "unchecked",
+          br: document.getElementById("br-check").checked ? "checked" : "unchecked",
+        }
+      }, "*")
+
+      underline = document.getElementById("underline-check").checked
+      bold = document.getElementById("bold-check").checked
+      italics = document.getElementById("italics-check").checked
+      br = document.getElementById("br-check").checked
+
+      document.getElementById("toggle-options").innerText = "Show options"
+      document.getElementById("options").style.display = "none"
+      document.getElementById("text").style.display = "block"
+    }
+
+  })
+</script>
+
+<style>
+  * :focus {
+    outline-color: blueviolet;
+  }
+
+  #text {
+    padding: 12px;
+    border: 1px solid var(--figma-color-text);
+    border-radius: 4px;
+    color: var(--figma-color-text);
+    background-color: var(--figma-color-bg);
+
+    width: 100%;
+    height: 90%;
+    resize: none;
+
+    font-size: 16px;
+    font-weight: 400;
+    font-family: system-ui, sans-serif;
+  }
+
+  button {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    height: 24px;
+    font-family: Whyte, sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    font-style: normal;
+    background-color: var(--figma-color-text);
+    color: var(--figma-color-bg);
+    border: none;
+    border-radius: 4px;
+    padding: 0 8px;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  #options {
+    display: none;
+    margin-left: 14px;
+    margin-top: 24px;
+  }
+
+
+  .checkbox {
+    position: relative;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .checkbox label {
+    margin-left: 36px;
+    padding-bottom: 2px;
+    font-size: 16px;
+    font-weight: 400;
+    font-family: Whyte, sans-serif;
+    color: var(--figma-color-text);
+  }
+
+  .checkbox input {
+    height: 24px;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 24px;
+  }
+
+  .checkbox input+label::before {
+    content: "";
+    height: 26px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 26px;
+    border: 1px solid var(--figma-color-text);
+    border-radius: 4px;
+    cursor: pointer;
+
+  }
+
+  .checkbox input+label::after {
+    content: "";
+    border: 4px solid;
+    border-left: 0;
+    border-top: 0;
+    height: 12px;
+    left: 9px;
+    opacity: 0;
+    position: absolute;
+    top: 4px;
+    transform: rotate(45deg);
+    width: 6px;
+    cursor: pointer;
+
+  }
+
+  .checkbox input:checked+label::after {
+    opacity: 1;
+    color: #fff;
+
+  }
+
+  .checkbox input:checked+label::before {
+    background-color: #9747FF;
+
+  }
+</style>
