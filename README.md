@@ -1,4 +1,5 @@
 # Figma Plugin: Copy text with HTML tags
+<b>Figma Community link: [Copy text with HTML tags](https://www.figma.com/community/plugin/1303630671231148889/copy-text-with-html-tags)</b>
 ### How to get started?
 
 Open the plugin and select a text box in your Figma file. Then, watch the text in the plugin window transform into semantically tagged text ready to be copied into your code editor.
