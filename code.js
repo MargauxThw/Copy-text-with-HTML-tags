@@ -5,6 +5,7 @@ figma.showUI(__html__, {
   themeColors: true
 });
 
+// Get selected options from persistent prefs (default to selected if no prefs)
 var underline =
   figma.root.getPluginData("underline") === "unchecked" ? false : true;
 var italics =
@@ -12,6 +13,7 @@ var italics =
 var bold = figma.root.getPluginData("bold") === "unchecked" ? false : true;
 var br = figma.root.getPluginData("br") === "unchecked" ? false : true;
 
+// Send selected options to UI
 figma.ui.postMessage({
   underline: underline,
   bold: bold,
@@ -20,28 +22,35 @@ figma.ui.postMessage({
   msg: "init-options",
 });
 
+// Initialise text based on selection
 updatePhrase();
 
+// Update text based on selection change
 figma.on("selectionchange", () => {
   updatePhrase();
 });
 
+// React to options change in ui.html
 figma.ui.onmessage = (msg) => {
   if (msg.type === "update-options") {
+    // Update in persistent prefs
     figma.root.setPluginData("underline", msg.underline);
     figma.root.setPluginData("italics", msg.italics);
     figma.root.setPluginData("bold", msg.bold);
     figma.root.setPluginData("br", msg.br);
 
+    // Update in current session
     underline = msg.underline === "unchecked" ? false : true;
     italics = msg.italics === "unchecked" ? false : true;
     bold = msg.bold === "unchecked" ? false : true;
     br = msg.br === "unchecked" ? false : true;
 
+    // Update text based on option change
     updatePhrase();
   }
 };
 
+// Main helper function to determine html from text
 function updatePhrase() {
   if (
     figma.currentPage.selection.length == 1 &&
@@ -64,11 +73,11 @@ function updatePhrase() {
         seg = `<u>${seg}</u>`;
       }
 
-      if (bold && segs[i].fontName.style === "Bold") {
+      if (bold && segs[i].fontName.style.toLowerCase().includes("bold")) {
         seg = `<b>${seg}</b>`;
       }
 
-      if (italics && segs[i].fontName.style === "Italic") {
+      if (italics && segs[i].fontName.style.toLowerCase().includes("italic")) {
         seg = `<i>${seg}</i>`;
       }
 
