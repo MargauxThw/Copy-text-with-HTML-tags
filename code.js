@@ -2,7 +2,7 @@ figma.showUI(__html__, {
   width: 350,
   height: 350,
   title: "Select one text box to begin...",
-  themeColors: true
+  themeColors: true,
 });
 
 // Get selected options from persistent prefs (default to selected if no prefs)
@@ -58,6 +58,38 @@ figma.ui.onmessage = (msg) => {
   }
 };
 
+// Helper function for color conversion
+function convertToHex(r, g, b) {
+  r = Math.round(r * 255.0);
+  g = Math.round(g * 255.0);
+  b = Math.round(b * 255.0);
+
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Helper function to return the majority HEX code of a textNode's styled segments
+function getMainColor(segs) {
+  let fills = new Set();
+  let freqs = {};
+
+  for (let i = 0; i < segs.length; i++) {
+    let color = convertToHex(
+      segs[i].fills[0].color.r,
+      segs[i].fills[0].color.g,
+      segs[i].fills[0].color.b
+    );
+
+    if (!fills.has(color)) {
+      fills.add(color);
+      freqs[color] = 0;
+    }
+
+    freqs[color] += segs[i].characters.length;
+  }
+
+  return Object.keys(freqs).reduce((a, b) => (freqs[a] > freqs[b] ? a : b));
+}
+
 // Main helper function to determine html from text
 function updatePhrase() {
   if (
@@ -68,11 +100,12 @@ function updatePhrase() {
       "textDecoration",
       "fontName",
       "fills",
-      "hyperlink"
+      "hyperlink",
     ]);
     var newSegs = [];
-
-    // console.log(segs)
+    var mainTextFill = getMainColor(segs);
+    console.log(mainTextFill);
+    console.log(segs);
 
     // Nesting tags
     for (let i = 0; i < segs.length; i++) {
@@ -82,7 +115,11 @@ function updatePhrase() {
         seg = seg.replaceAll("\n", "<br>");
       }
 
-      if (underline && segs[i].textDecoration === "UNDERLINE") {
+      if (
+        underline &&
+        segs[i].textDecoration === "UNDERLINE" &&
+        segs[i].hyperlink == null
+      ) {
         seg = `<u>${seg}</u>`;
       }
 
@@ -94,10 +131,24 @@ function updatePhrase() {
         seg = `<i>${seg}</i>`;
       }
 
+      if (links && segs[i].hyperlink) {
+        seg = `<a href="${segs[i].hyperlink.value}">${seg}</a>`;
+      }
+
+      let hexFill = convertToHex(
+        segs[i].fills[0].color.r,
+        segs[i].fills[0].color.g,
+        segs[i].fills[0].color.b
+      );
+      if (colors && hexFill !== mainTextFill) {
+        seg = `<span style="color: ${hexFill};">${seg}</span>`;
+      }
+
       newSegs.push(seg);
     }
 
-    // Joining adjacent tags
+    // Joining adjacent tags (not including links)
+    let prevColor = ""
     for (let i = 0; i < newSegs.length; i++) {
       if (underline && newSegs[i].includes("<u>")) {
         if (i != 0 && newSegs[i - 1].includes("</u>")) {
@@ -118,6 +169,25 @@ function updatePhrase() {
           newSegs[i] = newSegs[i].replace("<i>", "");
           newSegs[i - 1] = newSegs[i - 1].replace("</i>", "");
         }
+      }
+
+      if (colors && newSegs[i].includes("<span style=")) {
+        if (i != 0 && newSegs[i - 1].includes("<span style=")) {
+          // Case where first time 2 adjacent segments have same span color
+          if (newSegs[i].substring(20, 27) === newSegs[i - 1].substring(20, 27)) {
+            prevColor = newSegs[i].substring(20, 27)
+            console.log("Adding color", prevColor)
+            newSegs[i] = newSegs[i].substring(30);
+            newSegs[i-1] = newSegs[i-1].replace("</span>", "");
+
+          } 
+          // Case where previous segment has been edited for above
+        } else if (i != 0 && newSegs[i - 1].includes("</span>") && newSegs[i].substring(20, 27) === prevColor) {
+          newSegs[i] = newSegs[i].substring(30);
+          newSegs[i-1] = newSegs[i-1].replace("</span>", "");
+        }
+      } else {
+        prevColor = ""
       }
     }
 

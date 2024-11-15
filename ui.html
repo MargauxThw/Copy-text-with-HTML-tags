@@ -1,96 +1,137 @@
 <textarea id="text"></textarea>
 <div id="options">
   <div class="checkbox">
-    <input id="br-check" name="br-check" type="checkbox" value="br-check">
+    <input id="br-check" name="br-check" type="checkbox" value="br-check" />
     <label for="br-check">Replace new lines with &lt;br></label>
   </div>
   <div class="checkbox">
-    <input id="underline-check" name="underline-check" type="checkbox" value="underline-check">
+    <input
+      id="underline-check"
+      name="underline-check"
+      type="checkbox"
+      value="underline-check"
+    />
     <label for="underline-check">Include underline tags (&lt;u>&lt;/u>)</label>
   </div>
   <div class="checkbox">
-    <input id="italics-check" name="italics-check" type="checkbox" value="italics-check">
+    <input
+      id="italics-check"
+      name="italics-check"
+      type="checkbox"
+      value="italics-check"
+    />
     <label for="italics-check">Include italics tags (&lt;i>&lt;/i>)</label>
   </div>
   <div class="checkbox">
-    <input id="bold-check" name="bold-check" type="checkbox" value="bold-check">
+    <input
+      id="bold-check"
+      name="bold-check"
+      type="checkbox"
+      value="bold-check"
+    />
     <label for="bold-check">Include bold tags (&lt;b>&lt;/b>)</label>
   </div>
   <div class="checkbox">
-    <input id="color-check" name="color-check" type="checkbox" value="color-check">
+    <input
+      id="color-check"
+      name="color-check"
+      type="checkbox"
+      value="color-check"
+    />
     <label for="color-check">Include colors (&lt;span style="color: ">)</label>
   </div>
   <div class="checkbox">
-    <input id="link-check" name="link-check" type="checkbox" value="link-check">
+    <input
+      id="link-check"
+      name="link-check"
+      type="checkbox"
+      value="link-check"
+    />
     <label for="link-check">Include links (&lt;a href="">&lt;/a>)</label>
   </div>
 </div>
 <button id="toggle-options">Show options</button>
 
-
 <script>
-  var underline = true
-  var bold = true
-  var italics = true
-  var br = true
-  var links = true
-  var colors = true
+  var underline = true;
+  var bold = true;
+  var italics = true;
+  var br = true;
+  var links = true;
+  var colors = true;
 
   onmessage = (event) => {
     if (event.data.pluginMessage.msg === "init") {
-      var text = event.data.pluginMessage.text
-      document.getElementById("text").value = text
+      var text = event.data.pluginMessage.text;
+      document.getElementById("text").value = text;
     } else if (event.data.pluginMessage.msg === "init-options") {
       // Boolean values
-      underline = event.data.pluginMessage.underline
-      bold = event.data.pluginMessage.bold
-      italics = event.data.pluginMessage.italics
-      br = event.data.pluginMessage.br
-      colors = event.data.pluginMessage.colors
-      links = event.data.pluginMessage.links
+      underline = event.data.pluginMessage.underline;
+      bold = event.data.pluginMessage.bold;
+      italics = event.data.pluginMessage.italics;
+      br = event.data.pluginMessage.br;
+      colors = event.data.pluginMessage.colors;
+      links = event.data.pluginMessage.links;
     }
-  }
+  };
 
-  document.getElementById("toggle-options").addEventListener("click", function () {
-    if (document.getElementById("toggle-options").innerText === "Show options") {
-      document.getElementById("underline-check").checked = underline
-      document.getElementById("bold-check").checked = bold
-      document.getElementById("italics-check").checked = italics
-      document.getElementById("br-check").checked = br
-      document.getElementById("color-check").checked = colors
-      document.getElementById("link-check").checked = links
+  document
+    .getElementById("toggle-options")
+    .addEventListener("click", function () {
+      if (
+        document.getElementById("toggle-options").innerText === "Show options"
+      ) {
+        document.getElementById("underline-check").checked = underline;
+        document.getElementById("bold-check").checked = bold;
+        document.getElementById("italics-check").checked = italics;
+        document.getElementById("br-check").checked = br;
+        document.getElementById("color-check").checked = colors;
+        document.getElementById("link-check").checked = links;
 
-      document.getElementById("toggle-options").innerText = "Hide options & save"
-      document.getElementById("text").style.display = "none"
-      document.getElementById("options").style.display = "block"
+        document.getElementById("toggle-options").innerText =
+          "Hide options & save";
+        document.getElementById("text").style.display = "none";
+        document.getElementById("options").style.display = "block";
+      } else {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "update-options",
+              underline: document.getElementById("underline-check").checked
+                ? "checked"
+                : "unchecked",
+              bold: document.getElementById("bold-check").checked
+                ? "checked"
+                : "unchecked",
+              italics: document.getElementById("italics-check").checked
+                ? "checked"
+                : "unchecked",
+              br: document.getElementById("br-check").checked
+                ? "checked"
+                : "unchecked",
+              links: document.getElementById("link-check").checked
+                ? "checked"
+                : "unchecked",
+              colors: document.getElementById("color-check").checked
+                ? "checked"
+                : "unchecked",
+            },
+          },
+          "*"
+        );
 
+        underline = document.getElementById("underline-check").checked;
+        bold = document.getElementById("bold-check").checked;
+        italics = document.getElementById("italics-check").checked;
+        br = document.getElementById("br-check").checked;
+        links = document.getElementById("link-check").checked;
+        colors = document.getElementById("color-check").checked;
 
-    } else {
-      parent.postMessage({
-        pluginMessage: {
-          type: "update-options",
-          underline: document.getElementById("underline-check").checked ? "checked" : "unchecked",
-          bold: document.getElementById("bold-check").checked ? "checked" : "unchecked",
-          italics: document.getElementById("italics-check").checked ? "checked" : "unchecked",
-          br: document.getElementById("br-check").checked ? "checked" : "unchecked",
-          links: document.getElementById("link-check").checked ? "checked" : "unchecked",
-          colors: document.getElementById("color-check").checked ? "checked" : "unchecked",
-        }
-      }, "*")
-
-      underline = document.getElementById("underline-check").checked
-      bold = document.getElementById("bold-check").checked
-      italics = document.getElementById("italics-check").checked
-      br = document.getElementById("br-check").checked
-      links = document.getElementById("link-check").checked
-      colors = document.getElementById("color-check").checked
-
-      document.getElementById("toggle-options").innerText = "Show options"
-      document.getElementById("options").style.display = "none"
-      document.getElementById("text").style.display = "block"
-    }
-
-  })
+        document.getElementById("toggle-options").innerText = "Show options";
+        document.getElementById("options").style.display = "none";
+        document.getElementById("text").style.display = "block";
+      }
+    });
 </script>
 
 <style>
@@ -138,7 +179,6 @@
     margin-top: 24px;
   }
 
-
   .checkbox {
     position: relative;
     height: 28px;
@@ -165,7 +205,7 @@
     width: 24px;
   }
 
-  .checkbox input+label::before {
+  .checkbox input + label::before {
     content: "";
     height: 26px;
     left: 0;
@@ -175,10 +215,9 @@
     border: 1px solid var(--figma-color-text);
     border-radius: 4px;
     cursor: pointer;
-
   }
 
-  .checkbox input+label::after {
+  .checkbox input + label::after {
     content: "";
     border: 4px solid;
     border-left: 0;
@@ -191,17 +230,14 @@
     transform: rotate(45deg);
     width: 6px;
     cursor: pointer;
-
   }
 
-  .checkbox input:checked+label::after {
+  .checkbox input:checked + label::after {
     opacity: 1;
     color: #fff;
-
   }
 
-  .checkbox input:checked+label::before {
-    background-color: #9747FF;
-
+  .checkbox input:checked + label::before {
+    background-color: #9747ff;
   }
 </style>
