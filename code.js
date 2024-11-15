@@ -12,6 +12,8 @@ var italics =
   figma.root.getPluginData("italics") === "unchecked" ? false : true;
 var bold = figma.root.getPluginData("bold") === "unchecked" ? false : true;
 var br = figma.root.getPluginData("br") === "unchecked" ? false : true;
+var colors = figma.root.getPluginData("colors") === "unchecked" ? false : true;
+var links = figma.root.getPluginData("links") === "unchecked" ? false : true;
 
 // Send selected options to UI
 figma.ui.postMessage({
@@ -19,6 +21,8 @@ figma.ui.postMessage({
   bold: bold,
   br: br,
   italics: italics,
+  colors: colors,
+  links: links,
   msg: "init-options",
 });
 
@@ -38,12 +42,16 @@ figma.ui.onmessage = (msg) => {
     figma.root.setPluginData("italics", msg.italics);
     figma.root.setPluginData("bold", msg.bold);
     figma.root.setPluginData("br", msg.br);
+    figma.root.setPluginData("colors", msg.colors);
+    figma.root.setPluginData("links", msg.links);
 
     // Update in current session
     underline = msg.underline === "unchecked" ? false : true;
     italics = msg.italics === "unchecked" ? false : true;
     bold = msg.bold === "unchecked" ? false : true;
     br = msg.br === "unchecked" ? false : true;
+    colors = msg.colors === "unchecked" ? false : true;
+    links = msg.links === "unchecked" ? false : true;
 
     // Update text based on option change
     updatePhrase();
@@ -59,9 +67,14 @@ function updatePhrase() {
     var segs = figma.currentPage.selection[0].getStyledTextSegments([
       "textDecoration",
       "fontName",
+      "fills",
+      "hyperlink"
     ]);
     var newSegs = [];
 
+    // console.log(segs)
+
+    // Nesting tags
     for (let i = 0; i < segs.length; i++) {
       let seg = segs[i].characters;
 
@@ -84,6 +97,7 @@ function updatePhrase() {
       newSegs.push(seg);
     }
 
+    // Joining adjacent tags
     for (let i = 0; i < newSegs.length; i++) {
       if (underline && newSegs[i].includes("<u>")) {
         if (i != 0 && newSegs[i - 1].includes("</u>")) {
